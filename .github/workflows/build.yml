@@ -1,0 +1,34 @@
+name: Node.js CI
+on:
+  push:
+    paths-ignore: "**/README.md"
+
+permissions:
+    contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      app-name: my-app
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - run: npx sv create ${{ env.app-name }}
+    
+    - uses: actions/upload-artifact@v4.6.0
+      with:
+        name: "${{ env.app-name }}-${{ matrix.node-version }}"
+        path: "${{ env.app-name }}-${{ matrix.node-version }}"
